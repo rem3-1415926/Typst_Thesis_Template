@@ -16,7 +16,10 @@
 	// Co-Advisors (optional). Use array syntax.
 	co_advisors: (),
 
-	// University
+	// Industry partner (optional). Use array syntax.
+	industry_partners: (),
+
+	// University. Use string syntax
 	university: "College of Winterhold",
 
 	// Paper size. Must not be capitalized.
@@ -48,8 +51,11 @@
 	// Everything before the Table of Contents
 	frontmatter: [],
 
-	// Everything after main content,
+	// Everything after main content
 	appendix: [],
+
+	// List of bibliography files, path relative to template. Use array syntax.
+	bib_files: (),
 
 	body
 ) = {  // Layout etc ----------------------------------------------------------
@@ -170,6 +176,21 @@
 
 	set math.equation(numbering: "(1)")
 
+	show ref: it => {
+		let eq = math.equation
+		let el = it.element
+		if el != none and el.func() == eq {
+			// Override equation references.
+			[Eq.#numbering(
+			"(1)",
+			..counter(eq).at(el.location())
+			)]
+		} else {
+			// Other references as usual.
+			it
+		}
+	}
+
 
 	// Title page -------------------------------------------------------------
 	if (titlepage != none) {
@@ -190,16 +211,26 @@
 			#for a in authors.slice(0,-1) [#a, ]
 			#authors.at(-1)
 			#v(0.6em, weak: true)
+			
 			*#if(advisors.len() > 1) [Advisors] else [Advisor]*
 			#v(0.6em, weak: true)
 			#for a in advisors.slice(0,-1) [#a, ]
 			#advisors.at(-1)
+
 			#if(co_advisors.len() > 0) [
 				#v(0.6em, weak: true)
 				*#if(co_advisors.len() > 1) [Co-Advisors] else [Co-Advisor]*
 				#v(0.6em, weak: true)
 				#for a in co_advisors.slice(0,-1) [#a, ]
 				#co_advisors.at(-1)
+			]
+
+			#if(industry_partners.len() > 0) [
+				#v(0.6em, weak: true)
+				*#if(industry_partners.len() > 1) [Industry Partners] else [Industry Partner]*
+				#v(0.6em, weak: true)
+				#for a in industry_partners.slice(0,-1) [#a, ]
+				#industry_partners.at(-1)
 			]
 			#v(1.2em, weak: true)
 			#university
@@ -249,7 +280,7 @@
 		[= Bibliography]
 		bibliography(
 			title: none,  // doesn't follow heading formatting
-			("bib/Hayagriva.yml", "bib/BibLaTex.bib"),
+			bib_files,
 		)
 		// v(15cm)
 		// lorem(300)

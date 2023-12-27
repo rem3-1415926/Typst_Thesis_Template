@@ -26,11 +26,13 @@
 		"Jebediah Kerman",
 		"Valentina Kerman",
 	),
+	industry_partners: ("C7 Aerospace Division", "Ionic Symphonic Protonic Electronics"),
 	university: "OST - Ostschweizer Fachhochschule, Campus Rapperswil",
 
 	// titlepage: titlepage,
 	frontmatter: frontmatter,
 	appendix: appendix,
+	bib_files: ("bib/BibLaTex.bib", "bib/Hayagriva.yml"),
 )
 
 
