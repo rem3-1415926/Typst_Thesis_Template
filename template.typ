@@ -12,6 +12,9 @@
 
 	// Advisor or Professor. Use array syntax.
 	advisors: ("Prof. Dr. Giv Goodgrade", ),
+	
+	// Co-Advisors (optional). Use array syntax.
+	co_advisors: (),
 
 	// University
 	university: "College of Winterhold",
@@ -29,8 +32,8 @@
 
 	// List of preferred fonts to use. First available will be taken.
 	fonts: (
-		"Trebuchet MS",
-		"linux libertine",
+		"Grandview",
+		"Liberation Sans",
 	),
 
 	// Default text font size
@@ -99,12 +102,13 @@
 
 	let footer = locate(loc => {
 		let currentpage = counter(page).at(loc).at(0)
-		// let total_pages = query(<document_end>, loc).at(0).location().page()
 		let total_pages = counter(page).at(query(<document_end>, loc).at(0).location()).at(0)
 		let numbering = [#currentpage / #total_pages]
 		let txt_authors = [
-				#for a in authors.slice(0,-1) [#a, ]
-				#authors.at(-1)
+			#set par(justify: false)
+			#set text(hyphenate: false)
+			#for a in authors.slice(0,-1) [#a, ]
+			#authors.at(-1)
 		]
 		let date = [#datetime.today().display("[day]. [Month repr:long]. [year]")]
 		pad(y:-0.5em)[#line(length: 100%, stroke: 0.5pt)]
@@ -146,6 +150,12 @@
 				text(size: 24pt)[#it]
 				pad(top: -0.5em, bottom: 1em)[#line(length: 100%, stroke: 2pt)]
 			}
+		} 
+		#if it.level == 2{
+			return{ text(size: font_size*1.5)[#it] }
+		}
+		#if it.level == 3{
+			return{ text(size: font_size*1.2)[#it] }
 		} else {
 			it
 		}
@@ -184,6 +194,13 @@
 			#v(0.6em, weak: true)
 			#for a in advisors.slice(0,-1) [#a, ]
 			#advisors.at(-1)
+			#if(co_advisors.len() > 0) [
+				#v(0.6em, weak: true)
+				*#if(co_advisors.len() > 1) [Co-Advisors] else [Co-Advisor]*
+				#v(0.6em, weak: true)
+				#for a in co_advisors.slice(0,-1) [#a, ]
+				#co_advisors.at(-1)
+			]
 			#v(1.2em, weak: true)
 			#university
 			#v(0.6em, weak: true)
@@ -224,7 +241,6 @@
 			}
 		]
 
-		// pagebreak(weak: true, to: "odd")  // yeah that does exactly nothing fml
 		counter(page).update(1)
 
 		body
