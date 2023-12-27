@@ -43,7 +43,7 @@
 	titlepage: none,
 
 	// Everything before the Table of Contents
-	abstract: [],
+	frontmatter: [],
 
 	// Everything after main content,
 	appendix: [],
@@ -89,12 +89,10 @@
 		grid(
 			columns: (1fr, 1fr, 1fr),
 			align(left)[
-				#if calc.even(currentpage) [_ #last_heading _] 
-				else [_ #thesis_title _]],
+				#if calc.even(currentpage) [_ #last_heading _] else [_ #thesis_title _]],
 			[],
 			align(right)[
-				#if calc.odd(currentpage) [_ #last_heading _] 
-				else [_ #thesis_title _]]
+				#if calc.odd(currentpage) [_ #last_heading _] else [_ #thesis_title _]]
 		)
 		pad(y:-0.75em)[#line(length: 100%, stroke: 0.5pt)]
 	})
@@ -127,6 +125,10 @@
 		paper: "a4",
 		binding: left,
 		margin: margins,
+		header: header,
+		header-ascent: 30%,
+		footer: footer,
+		footer-descent: 30%,
 	)
 
 	set heading(
@@ -140,20 +142,32 @@
 	show heading: it => block[
 		#if it.level == 1{
 			return{
-				// pagebreak(weak: true)  //   <- kills pagebreak("odd") in Frontmatter
+				// pagebreak is defined locally
 				text(size: 24pt)[#it]
 				pad(top: -0.5em, bottom: 1em)[#line(length: 100%, stroke: 2pt)]
 			}
+		} else {
+			it
 		}
-		else{it}
 	]
+
+	show outline.entry.where(
+		level: 1
+		): it => {
+		v(12pt, weak: true)
+		strong(it)
+	}
+
+	set math.equation(numbering: "(1)")
 
 
 	// Title page -------------------------------------------------------------
 	if (titlepage != none) {
+		set page(header: none, footer: none)
 		titlepage
 	}
 	else {
+		set page(header: none, footer: none)
 		align(center + horizon)[
 			#text(3em)[*#thesis_title*]
 			#v(1.5em, weak: true)	
@@ -177,126 +191,118 @@
 	}
 
 	// Frontmatter ------------------------------------------------------------
-	pagebreak() 
-	// empty page because to:"odd" apparently cannot deal with changes in 
-	// page counter value or display
-	pagebreak()
-	set page(
-		header: header,
-		header-ascent: 30%,
-		footer: footer_front,
-		footer-descent: 30%,
-	)
-	counter(page).update(1)
-	abstract
+	[
+		#set page(footer: footer_front)
+		#counter(page).update(1)
 
-	pagebreak(to: "odd")
-	show outline.entry.where(
-		level: 1
-		): it => {
-		v(12pt, weak: true)
-		strong(it)
-	}
-	// [= Contents]
-	outline(
-		// title: none,  
-		depth: 2,
-		indent: true
-	)
+		// use odd side pagebreak for frontmatter
+		#show heading: it => block[
+			#if it.level == 1{
+				return{pagebreak(weak: true, to: "odd"); it}
+			} else {it}
+		]
 
-	// Main content -----------------------------------------------------------
-	set page(
-		footer: footer,
-		footer-descent: 30%,
-	)
+		#frontmatter
 
-	// restore pagebreak at heading
-	show heading: it => block[
-		#if it.level == 1{
-			return{
-				pagebreak(weak: true)
-				it
-			}
-		}
-		else{it}
+		#outline(
+			depth: 2,
+			indent: true
+		)
 	]
 
-	pagebreak(to: "even")
-	counter(page).update(0)
+	// Main content -----------------------------------------------------------
+	{
+		// use any side pagebreak for main content
+		show heading: it => block[
+			#if it.level == 1{
+				return{
+					pagebreak(weak: true)
+					it
+				}
+			} else {
+				it
+			}
+		]
 
-	body
+		// pagebreak(weak: true, to: "odd")  // yeah that does exactly nothing fml
+		counter(page).update(1)
 
-	// Bibliography
-	[= Bibliography]
-	bibliography(
-		title: none,  // doesn't follow heading formatting
-		("bib/Hayagriva.yml", "bib/BibLaTex.bib"),
-	)
-	// v(15cm)
-	// lorem(300)
+		body
 
-	[#circle(radius: 0pt, stroke: none)
-	// void structures help with pagebreaks. Very interesting.
-	<bibliography_end>
-	#circle(radius: 0pt, stroke: none)
-	] 
+		// Bibliography
+		[= Bibliography]
+		bibliography(
+			title: none,  // doesn't follow heading formatting
+			("bib/Hayagriva.yml", "bib/BibLaTex.bib"),
+		)
+		// v(15cm)
+		// lorem(300)
+
+		[#circle(radius: 0pt, stroke: none)
+		// void structures help with pagebreaks. Very interesting.
+		<bibliography_end>
+		#circle(radius: 0pt, stroke: none)
+		]
+	}
 
 
 	// Appendix ---------------------------------------------------------------
-	let app_entries = state("x", ())
-	[
-		// pagebreak(to:"odd")  // Too bad it's bugged
-		#locate(loc => {
-			let currentpage = counter(page).at(query(<bibliography_end>, loc).at(0).location()).at(0)
-			if calc.odd(currentpage) [#pagebreak()]
-		})
-		= Appendix
-		// #[#circle(radius: 0pt, stroke: none)]
-		#text(size: 12pt, weight: "bold")[
-			#locate(loc => {
-				let all_app_entries = app_entries.at(query(<document_end>, loc)
-					.first()
-					.location()
-				)
-				return for (i, ae) in all_app_entries.enumerate() [
-					#v(1em)
-					#grid(columns: (1fr, 5em),
-						[#numbering("A", i+1) #ae.at(0)], 
-						align(right)[#ae.at(1)]
+	{
+		let app_entries = state("x", ())
+		[
+			#pagebreak(weak: true, to:"odd")
+			= Appendix
+			// #[#circle(radius: 0pt, stroke: none)]
+			#text(size: 12pt, weight: "bold")[
+				#locate(loc => {
+					let all_app_entries = app_entries.at(query(<document_end>, loc)
+						.first()
+						.location()
 					)
-				]
-			})
-		]
-		// apparently does not work:
-		// #outline(
-		// 	title: "Appendix Contents",
-		// 	target: heading.where(supplement: "Appendix ")
-		// )
-	] 
-
-	counter(heading).update(0)
-	set heading(
-		supplement: "Appendix",
-		outlined: false,
-		bookmarked: true,
-		numbering: (..numbers) =>
-			if numbers.pos().len() <= 3 {
-				return numbering("A.1.", ..numbers)
-			},
-	)
-	show heading: it => block[
-		#if it.level == 1{
-			return{[#it #locate(loc => {
-				let pn = counter(page).at(loc).at(0)
-				app_entries.update( x => {x.push((it.body, pn)); x}) 
+					return for (i, ae) in all_app_entries.enumerate() [
+						#v(1em)
+						#grid(columns: (1fr, 5em),
+							[#numbering("A", i+1) #ae.at(0)], 
+							align(right)[#ae.at(1)]
+						)
+					]
 				})
-			]}
-		}
-		else{it}
-	]
+			]
+			// apparently does not work:
+			// #outline(
+			// 	title: "Appendix Contents",
+			// 	target: heading.where(supplement: "Appendix ")
+			// )
+		] 
 
-	appendix
+		counter(heading).update(0)
+		set heading(
+			supplement: "Appendix",
+			outlined: false,
+			bookmarked: true,
+			numbering: (..numbers) =>
+				if numbers.pos().len() <= 3 {
+					return numbering("A.1.", ..numbers)
+				},
+		)
+		show heading: it => block[
+			#if it.level == 1{
+				// use odd side pagebreak for main content. 
+				// This is because pagebreak here kills manual pagebreaks needed for A3
+				return{[#pagebreak(weak: true, to: "odd") #it #locate(loc => {
+					let pn = counter(page).at(loc).at(0)
+					// add entry to Appendix outline
+					app_entries.update( x => {x.push((it.body, pn)); x}) 
+					})
+				]}
+			} else{
+				it
+			}
+		]
 
-	// void structure helps with this bug. (label otherwise on wrong page)
-	[#circle(radius: 0pt, stroke: none)<document_end>] 
+		appendix
+
+		// void structure helps with this bug. (label otherwise on wrong page)
+		[#circle(radius: 0pt, stroke: none)<document_end>] 
+	}
 }

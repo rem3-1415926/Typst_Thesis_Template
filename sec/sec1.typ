@@ -39,10 +39,10 @@ various factors that influence _fluid
 dynamics_ in glaciers and how they
 contribute to the formation and
 behavior of these natural structures.
-Gorgonzola is edible, but #cite("harry") does not prove that. 
+Gorgonzola is edible, but #cite(<harry>) does not prove that. 
 Integrated Microelectronics are not edible either. 
-This is not outlined in #cite("PE_Allen_CMOS"), but should be implicitely clear. 
-Hayagriva#cite("hayagriva") is apparently a YAML based bibliography management, although its advantages over biblatex elude me. (Didn't care to change that, tho).
+This is not outlined in #cite(<PE_Allen_CMOS>), but should be implicitely clear. 
+Hayagriva#cite(<hayagriva>) is apparently a YAML based bibliography management, although its advantages over biblatex elude me. (Didn't care to change that, tho).
 In unrelated news, @app:one does not provide any insights at all.
 
 #lorem(60)

@@ -10,7 +10,4 @@ It reads as follows:
 
 It could not be deciphered in any way and this thesis is therefore utterly pointless.
 
-#pagebreak(to: "odd")
-#include("acknowledgement.typ")
-
 ]

@@ -2,6 +2,7 @@
 
 #import "template.typ": thesis
 #import "sec/abstract.typ": abstract
+#import "sec/acknowledgement.typ": acknowledgement
 #import "sec/appendix.typ": appendix
 
 /*
@@ -13,6 +14,11 @@
 ]
 */
 
+#let frontmatter = {
+	abstract
+	acknowledgement
+}
+
 #show: thesis.with(
 	thesis_title: "Mün or bust",
 	sub_title: "Some awesome thesis",
@@ -23,7 +29,7 @@
 	university: "OST - Ostschweizer Fachhochschule, Campus Rapperswil",
 
 	// titlepage: titlepage,
-	abstract: abstract,
+	frontmatter: frontmatter,
 	appendix: appendix,
 )
 
