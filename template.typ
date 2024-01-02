@@ -161,7 +161,10 @@
 			return{ text(size: font_size*1.5)[#it] }
 		}
 		#if it.level == 3{
-			return{ text(size: font_size*1.2)[#it] }
+			return{ text(size: font_size*1.25)[#it] }
+		} 
+		#if it.level == 4{
+			return{ text(size: font_size*1.1)[_ #it _] }
 		} else {
 			it
 		}
