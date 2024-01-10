@@ -90,13 +90,22 @@
 				selector(heading.where(level: 1)).before(loc),
 				loc
 			)
+			#let elems2 = query(
+				selector(heading.where(level: 2)).before(loc),
+				loc
+			)
 			#if elems != () {
 				target_page = elems.at(-1).location().page()
-				elems.last().body
+				if elems2 != () {
+					// par(justify:false)[#elems.last().body \ #elems2.last().body]
+					[#elems2.last().body]
+				} else {
+					[#elems.last().body]
+				}
 			}
 		]
 		grid(
-			columns: (1fr, 1fr, 1fr),
+			columns: (1fr, 0.5fr, 1fr),
 			align(left)[
 				#if calc.even(currentpage) [_ #last_heading _] else [_ #thesis_title _]],
 			[],
@@ -194,6 +203,7 @@
 		}
 	}
 
+	show link: it => text(style:"italic")[#underline[#it]]
 
 	// Title page -------------------------------------------------------------
 	if (titlepage != none) {
