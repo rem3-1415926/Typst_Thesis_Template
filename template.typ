@@ -69,6 +69,7 @@
 		font: fonts,
 		size: font_size,
 		lang: lang,
+		hyphenate: false,
 	)
 
 	let header = locate(loc => {
@@ -107,10 +108,10 @@
 		grid(
 			columns: (1fr, 0.5fr, 1fr),
 			align(left)[
-				#if calc.even(currentpage) [_ #last_heading _] else [_ #thesis_title _]],
+				#if calc.even(currentpage) [_ #last_heading _] else [/*_ #thesis_title _*/]],
 			[],
 			align(right)[
-				#if calc.odd(currentpage) [_ #last_heading _] else [_ #thesis_title _]]
+				#if calc.odd(currentpage) [_ #last_heading _] else [/*_ #thesis_title _*/]]
 		)
 		pad(y:-0.75em)[#line(length: 100%, stroke: 0.5pt)]
 	})
@@ -129,9 +130,9 @@
 		pad(y:-0.5em)[#line(length: 100%, stroke: 0.5pt)]
 		grid(
 			columns: (1fr, 1fr, 1fr),
-			align(left)[#if calc.even(currentpage) [#numbering] else [#date]],
-			align(center)[#txt_authors],
-			align(right)[#if calc.odd(currentpage) [#numbering] else [#date]],
+			align(left)[#if calc.odd(currentpage) [#numbering] else [/*#date*/_ #thesis_title _]],
+			align(center)[/*#txt_authors*/],
+			align(right)[#if calc.even(currentpage) [#numbering] else [/*#date*/_ #thesis_title _]],
 		)
 	})
 
@@ -213,6 +214,7 @@
 	else {
 		set page(header: none, footer: none)
 		align(center + horizon)[
+			#set par(justify: false)
 			#text(3em)[*#thesis_title*]
 			#v(1.5em, weak: true)	
 			#text(2em, sub_title)
@@ -230,21 +232,23 @@
 			#for a in advisors.slice(0,-1) [#a, ]
 			#advisors.at(-1)
 
-			#if(co_advisors.len() > 0) [
+			#if(co_advisors != none){
+			if(co_advisors.len() > 0) [
 				#v(0.6em, weak: true)
 				*#if(co_advisors.len() > 1) [Co-Advisors] else [Co-Advisor]*
 				#v(0.6em, weak: true)
 				#for a in co_advisors.slice(0,-1) [#a, ]
 				#co_advisors.at(-1)
-			]
+			]}
 
-			#if(industry_partners.len() > 0) [
+			#if(industry_partners != none){
+			if(industry_partners.len() > 0) [
 				#v(0.6em, weak: true)
 				*#if(industry_partners.len() > 1) [Industry Partners] else [Industry Partner]*
 				#v(0.6em, weak: true)
 				#for a in industry_partners.slice(0,-1) [#a, ]
 				#industry_partners.at(-1)
-			]
+			]}
 			#v(1.2em, weak: true)
 			#university
 			#v(0.6em, weak: true)
@@ -255,6 +259,8 @@
 	[
 		#set page(footer: footer_front)
 		#counter(page).update(1)
+
+		#set heading(numbering:none, outlined: false, bookmarked: true)
 
 		// use odd side pagebreak for frontmatter
 		#show heading: it => block[
@@ -267,7 +273,7 @@
 
 		#outline(
 			depth: 2,
-			indent: true
+			indent: true,
 		)
 	]
 
